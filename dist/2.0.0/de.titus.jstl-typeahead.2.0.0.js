@@ -1,41 +1,51 @@
+/*
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2015 Frank Schüler
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+/*
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2015 Frank Schüler
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 (function($, ExpressionResolver) {
 	"use strict";
 	de.titus.core.Namespace.create("de.titus.jquery.Typeahead", function() {
-		let Typeahead = de.titus.jquery.Typeahead = function(aElement, aData) {
+		var Typeahead = de.titus.jquery.Typeahead = function(aElement, aData) {
 			this.element = aElement;
 			this.suggestionBox = undefined;
 			this.data = aData || {};
 			this.timeoutId = undefined;
 			this.suggestionData = undefined;
 			this.currentSelection = undefined;
-			this.selected = undefined;			
-			setTimeout(Typeahead.prototype.__init.bind(this), 1);
+			this.selected = undefined;
+			this.__init();
 		};
 
-		Typeahead.CONSTANTS = {
-			Version : "{version}",
-			KEYCODES : {
-			    KEY_ARROW_UP : 40,
-			    KEY_ARROW_DOWN : 38,
-			    KEY_ENTER : 13,
-			    KEY_ESC : 27
-			},
-			DEFAULT : {
-			    mode : "selection",
-			    inputInterval : 300,
-			    inputSize : 1,
-			    maxSuggestions : 10
-			},
-			EVENTS : {
-				select :"typeahead:select"
-			},
-			MODES : {
-				selection: "selection",
-				suggestion: "suggestion"
-			}
+		Typeahead.Version = "2.0.0";
+		Typeahead.KEYCODES = {
+		    KEY_ARROW_UP : 40,
+		    KEY_ARROW_DOWN : 38,
+		    KEY_ENTER : 13,
+		    KEY_ESC : 27
+
 		};
 
-		Typeahead.prototype.__initConfig = function() {
+		Typeahead.prototype.__init = function() {
 			if (this.data.inputAction == undefined || typeof this.data.inputAction !== "function") {
 				this.data.inputAction = ExpressionResolver.resolveExpression(this.element.attr("typeahead-input-action"));
 				if (typeof this.data.inputAction !== "function")
@@ -45,34 +55,31 @@
 			if (this.data.selectionAction == undefined || typeof this.data.selectAction !== "function") {
 				this.data.selectionAction = ExpressionResolver.resolveExpression(this.element.attr("typeahead-selection-action"));
 			}
-			
-			if (typeof this.data.mode === "undefined")
-				this.data.mode = this.element.attr("typeahead-mode");
 
-			if (typeof this.data.display  === "undefined")
+			if (this.data.keepinput == undefined)
+				this.data.keepinput = (this.element.attr("typeahead-keep-input") != undefined);
+
+			if (this.data.display == undefined)
 				this.data.display = this.element.attr("typeahead-display");
 
-			if (typeof this.data.displayMarker  === "undefined")
+			if (this.data.displayMarker == undefined)
 				this.data.displayMarker = (this.element.attr("typeahead-display-marker") != undefined);
 
-			if (typeof this.data.interval  === "undefined")
+			if (this.data.interval == undefined)
 				this.data.inputInterval = parseInt(this.element.attr("typeahead-input-interval") || "300");
 
-			if (typeof this.data.inputSize  === "undefined")
+			if (this.data.inputSize == undefined)
 				this.data.inputSize = parseInt(this.element.attr("typeahead-input-size") || "1");
 
-			if (typeof this.data.maxSuggestions  === "undefined")
+			if (this.data.maxSuggestions == undefined)
 				this.data.maxSuggestions = parseInt(this.element.attr("typeahead-max-suggestions") || "10");
 
-			if (typeof this.data.template  === "undefined")
+			if (this.data.template == undefined)
 				this.data.template = this.element.attr("typeahead-template");
-			
-			this.data = $.extend({}, this.data,Typeahead.CONSTANTS.DEFAULT);			
-		};
 
-		Typeahead.prototype.__init = function() {
-			this.__initConfig();
-			
+			if (this.data.multichoice == undefined)
+				this.data.multichoice = this.element.attr("typeahead-multi-choice") != undefined;
+
 			this.suggestionBox = $("<div></div>");
 			this.suggestionBox.addClass("typeahead-suggestion-box");
 			this.suggestionBox.attr("jstl-ignore", "");
@@ -82,8 +89,7 @@
 			innerBox.attr("jstl-include", this.data.template);
 
 			this.suggestionBox.append(innerBox);
-			//this.element.parent().append(this.suggestionBox);
-			this.suggestionBox.appendTo("body");
+			this.element.parent().append(this.suggestionBox);
 
 			this.element.on("keyup keypress change focus click", Typeahead.prototype.inputHandle.bind(this));
 		};
@@ -103,7 +109,7 @@
 				if (aEvent.keyCode == Typeahead.KEYCODES.KEY_ESC)
 					this.__cancelSelection(aEvent);
 				else if (aEvent.keyCode == Typeahead.KEYCODES.KEY_ENTER) {
-
+					
 					this.__confirmSelection(aEvent);
 				} else if (aEvent.keyCode == Typeahead.KEYCODES.KEY_ARROW_UP || aEvent.keyCode == Typeahead.KEYCODES.KEY_ARROW_DOWN)
 					this.__selectionByKey(aEvent);
@@ -303,7 +309,7 @@
 
 		de.titus.core.jquery.Components.asComponent("de.titus.Typeahead", Typeahead);
 		$(document).ready(function() {
-			$(".jstl-typeahead").de_titus_Typeahead();			
+			$(".jstl-typeahead").de_titus_Typeahead();
 		});
 	});
 })($, new de.titus.core.ExpressionResolver());
