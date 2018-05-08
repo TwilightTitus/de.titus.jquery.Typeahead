@@ -135,7 +135,7 @@
 		};
 
 		Typeahead.prototype.__doInput = function(aEvent) {
-			let value = (this.element.val() || "")
+			let value = (this.element.val() || "").trim();
 			if (this.data.mode == Typeahead.CONSTANTS.MODES.suggestion)
 				this.setSelectedData(value);
 
