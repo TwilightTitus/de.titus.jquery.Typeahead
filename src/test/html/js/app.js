@@ -86,9 +86,9 @@ var GIVENNAMES = [
 		var TESTVALUES = [];
 		var TESTVALUEMAP = {};
         while (TESTVALUES.length < 100){
-        	var givenname = GIVENNAMES[getRandomInt(GIVENNAMES.length)];
-        	var familyname = FAMILYNAMES[getRandomInt(FAMILYNAMES.length)];
-        	var key = givenname + familyname;
+        	let givenname = GIVENNAMES[getRandomInt(GIVENNAMES.length)];
+        	let familyname = FAMILYNAMES[getRandomInt(FAMILYNAMES.length)];
+        	let key = givenname + familyname;
         	if(TESTVALUEMAP[key] == undefined){
         		TESTVALUEMAP[key] = "";        	
 		        TESTVALUES.push({
@@ -100,16 +100,19 @@ var GIVENNAMES = [
         
         TESTVALUEMAP = undefined;
         
+        console.log(TESTVALUES);
+        
         function testSearch(aValue, aCallback) {
+        	console.log("testSearch:", aValue);
         	var value = aValue.toLowerCase().split(" ").filter(function(a){return a.length > 0;});
         	var results = [];
-        	for(var i = 0; i < TESTVALUES.length &&  results.length < 20; i++){
-        		var item = TESTVALUES[i];
+        	for(let i = 0; i < TESTVALUES.length &&  results.length < 20; i++){
+        		let item = TESTVALUES[i];
         		
         		if(acceptQuery(value,item.name))
         			results.push(item);        		
         	}
-        	
+        	console.log("testSearchStringsOnly:", results);
 	        aCallback(results)
         };
         
@@ -122,14 +125,15 @@ var GIVENNAMES = [
         };
         
         function testSearchStringsOnly(aValue, aCallback) {
+        	console.log("testSearchStringsOnly:", aValue);
         	var value = aValue.toLowerCase().split(" ").filter(function(a){return a.length > 0;});
         	var results = [];
-        	for(var i = 0; i < TESTVALUES.length &&  results.length < 20; i++){
-        		var item = TESTVALUES[i];
+        	for(let i = 0; i < TESTVALUES.length &&  results.length < 20; i++){
+        		let item = TESTVALUES[i];
         		if(acceptQuery(value,item.name))
         			results.push(item.name);    		
         	}        	
-        	
+        	console.log("testSearchStringsOnly:", results);
 	        aCallback(results)
         };
         
