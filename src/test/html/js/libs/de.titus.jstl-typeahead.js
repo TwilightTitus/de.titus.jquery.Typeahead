@@ -147,7 +147,7 @@
 		};
 
 		Typeahead.prototype.__doInput = function(aEvent) {
-			let value = (this.element.val() || "").trim();
+			let value = (this.element.val() || "");
 			if (this.data.mode == Typeahead.CONSTANTS.MODES.suggestion)
 				this.setSelectedData(value);
 
@@ -201,7 +201,7 @@
 
 		Typeahead.prototype.inputActionCallback = function(aValue, aValues) {
 			let value = (this.element.val() || "").trim();
-			if (value == aValue && typeof aValues !== 'undefined' && aValues.length > 0) {
+			if (value == aValue.trim() && typeof aValues !== 'undefined' && aValues.length > 0) {
 				this.suggestionData = this.__transformValues(aValue, aValues);
 				this.suggestionBox.jstl({
 				    data : {
