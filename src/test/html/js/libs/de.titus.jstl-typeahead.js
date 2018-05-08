@@ -171,6 +171,7 @@
 					index = this.suggestionData.list.length - 1;
 
 				this.currentSelection = this.suggestionData.list[index];
+				this.suggestionBox.find("[typeahead-selection-id='" + this.currentSelection.id + "']").addClass("active");
 			} else
 				this.currentSelection = this.suggestionData.list[0];
 
@@ -186,12 +187,14 @@
 		};
 
 		Typeahead.prototype.__confirmSelection = function(aEvent) {
-			if (this.currentSelection)
+			if (typeof this.currentSelection !== "undefined")
 				this.__doSelected(this.currentSelection);
-			else if (typeof this.suggestionData !== "undefined" && this.suggestionData.list.length == 1)
-				this.__doSelected(this.suggestionData.list[0]);
-			else
-				this.__doSelected();
+			else if (this.data.mode == Typeahead.CONSTANTS.MODES.selection) {
+				if (typeof this.suggestionData !== "undefined" && this.suggestionData.list.length == 1)
+					this.__doSelected(this.suggestionData.list[0]);
+				else
+					this.__doSelected();
+			} 
 			this.__hideSuggestionBox();
 		};
 
@@ -211,8 +214,9 @@
 				    callback : Typeahead.prototype.__initSuggestionBox.bind(this)
 				});
 			} else {
-//				if (typeof this.selected !== "undefined" && typeof this.selected.data !== "undefined")
-//					this.setSelectedData(this.selected.data);
+				// if (typeof this.selected !== "undefined" && typeof
+				// this.selected.data !== "undefined")
+				// this.setSelectedData(this.selected.data);
 				this.__hideSuggestionBox();
 			}
 		};
