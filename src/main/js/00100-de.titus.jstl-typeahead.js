@@ -14,6 +14,16 @@
 
 		Typeahead.CONSTANTS = {
 		    Version : "{version}",
+		    Utils : {
+			    isSpecialKey : function(aKeyCode) {
+				    let keys = Object.getOwnPropertyNames(Typeahead.CONSTANTS.KEYCODES);
+				    for (let i = 0; i < keys.length; i++)
+					    if (Typeahead.CONSTANTS.KEYCODES[keys[i]] == aKeyCode)
+						    return true;
+
+				    return false;
+			    }
+		    },
 		    KEYCODES : {
 		        KEY_ARROW_UP : 40,
 		        KEY_ARROW_DOWN : 38,
@@ -101,27 +111,32 @@
 				if (typeof this.selected !== "undefined" && typeof this.selected.data !== "undefined")
 					this.setSelectedData(this.selected.data);
 				this.__hideSuggestionBox();
-			} else if (aEvent.type == "keyup" && (aEvent.keyCode != Typeahead.CONSTANTS.KEYCODES.KEY_ESC && aEvent.keyCode != Typeahead.CONSTANTS.KEYCODES.KEY_ENTER && aEvent.keyCode != Typeahead.CONSTANTS.KEYCODES.KEY_ARROW_UP && aEvent.keyCode != Typeahead.CONSTANTS.KEYCODES.KEY_ARROW_DOWN))
+			} else if (aEvent.type == "keyup" && !Typeahead.CONSTANTS.Utils.isSpecialKey(aEvent.keyCode))
 				this.__doInput(aEvent);
-			else if (aEvent.type == "keypress" && (aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ESC || aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ENTER || aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ARROW_UP || aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ARROW_DOWN)) {
-				aEvent.preventDefault();
-				aEvent.stopPropagation();
-				if (aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ESC)
-					this.__cancelSelection(aEvent);
-				else if (aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ENTER) {
-					this.__confirmSelection(aEvent);
-				} else if (aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ARROW_UP || aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ARROW_DOWN)
-					this.__selectionByKey(aEvent);
-			} else if (aEvent.type == "change" && !this.suggestionBox.is(".active"))
+			else if (aEvent.type == "keypress" && Typeahead.CONSTANTS.Utils.isSpecialKey(aEvent.keyCode))
+				this.__handleSpecialKeys(aEvent);
+			else if (aEvent.type == "change" && !this.suggestionBox.is(".active"))
 				this.__doInput(aEvent);
 			else if (aEvent.type == "focus")
 				if (typeof this.selected !== "undefined" && typeof this.selected.data !== "undefined")
 					this.setSelectedData(this.selected.data);
 		};
 
+		Typeahead.prototype.__handleSpecialKeys = function(aEvent) {
+			if (aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ESC)
+				this.__cancelSelection(aEvent);
+			else if (aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ENTER) {
+				this.__confirmSelection(aEvent);
+			} else if (aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ARROW_UP || aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ARROW_DOWN)
+				this.__selectionByKey(aEvent);
+
+			aEvent.preventDefault();
+			aEvent.stopPropagation();
+		};
+
 		Typeahead.prototype.__doInput = function(aEvent) {
 			let value = (this.element.val() || "")
-			if (this.data.mode === Typeahead.CONSTANTS.MODES.suggestion)
+			if (this.data.mode == Typeahead.CONSTANTS.MODES.suggestion)
 				this.setSelectedData(value);
 
 			if (value.length >= this.data.inputSize)
@@ -184,8 +199,8 @@
 				    callback : Typeahead.prototype.__initSuggestionBox.bind(this)
 				});
 			} else {
-				if (typeof this.selected !== "undefined" && typeof this.selected.data !== "undefined")
-					this.setSelectedData(this.selected.data);
+//				if (typeof this.selected !== "undefined" && typeof this.selected.data !== "undefined")
+//					this.setSelectedData(this.selected.data);
 				this.__hideSuggestionBox();
 			}
 		};
