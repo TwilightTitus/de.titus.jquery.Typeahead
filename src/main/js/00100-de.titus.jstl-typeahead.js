@@ -150,13 +150,11 @@
 						this.__fireSelectEvent();
 				} else if (this.suggestionBox.is(".active") && typeof this.currentSelection === "undefined") {
 					if (this.data.mode == Typeahead.CONSTANTS.MODES.selection)
-						this.__cancelSelection(aEvent);
-					else{
+						this.__confirmSelection(aEvent);
+					else
 						this.__hideSuggestionBox();
-						this.__fireSelectEvent();						
-					}
-				}
-				else 
+					this.__fireSelectEvent();
+				} else
 					this.__fireSelectEvent();
 			} else if (aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ARROW_UP || aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ARROW_DOWN)
 				this.__selectionByKey(aEvent);
@@ -176,6 +174,7 @@
 		};
 
 		Typeahead.prototype.__doInput = function(aEvent) {
+			this.currentSelection = undefined;
 			let value = (this.element.val() || "");
 			if (value.trim().length == 0) {
 				this.setSelectedData();
