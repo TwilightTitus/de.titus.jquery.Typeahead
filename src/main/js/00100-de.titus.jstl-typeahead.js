@@ -23,32 +23,33 @@
 			    return false;
 		    },
 		    makerRegex : function(aValue) {
-				if (typeof aValue !== "string")
-					return undefined;
+			    if (typeof aValue !== "string")
+				    return undefined;
 
-				let regex = "";
-				aValue.trim().split(" ").filter(function(a) {
-					return a.length > 0
-				}).sort(function(a, b) {
-					return b.length - a.length;
-				}).forEach(function(value, index) {
-					if (index != 0)
-						regex += "|";
-					regex += value.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-				});
-				return new RegExp(regex, "ig");
-			},buildDisplay : function(aDisplay, aMarkerRegex) {
-				if (typeof aMarkerRegex === "undefined" || typeof aDisplay !== "string")
-					return aDisplay;
+			    let regex = "";
+			    aValue.trim().split(" ").filter(function(a) {
+				    return a.length > 0
+			    }).sort(function(a, b) {
+				    return b.length - a.length;
+			    }).forEach(function(value, index) {
+				    if (index != 0)
+					    regex += "|";
+				    regex += value.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+			    });
+			    return new RegExp(regex, "ig");
+		    },
+		    buildDisplay : function(aDisplay, aMarkerRegex) {
+			    if (typeof aMarkerRegex === "undefined" || typeof aDisplay !== "string")
+				    return aDisplay;
 
-				return aDisplay.replace(aMarkerRegex, function(aMatch) {
-					return "<b>" + aMatch + "</b>";
-				});
-			}
-			
-	    };
+			    return aDisplay.replace(aMarkerRegex, function(aMatch) {
+				    return "<b>" + aMatch + "</b>";
+			    });
+		    }
+
+		};
 		Typeahead.CONSTANTS = {
-		    Version : "{version}",		   
+		    Version : "{version}",
 		    KEYCODES : {
 		        KEY_ARROW_UP : 40,
 		        KEY_ARROW_DOWN : 38,
@@ -59,7 +60,7 @@
 		        mode : "selection",
 		        inputInterval : 300,
 		        inputSize : 1,
-		        maxSuggestions : 10		        
+		        maxSuggestions : 10
 		    },
 		    EVENTS : {
 			    select : "typeahead:select",
@@ -115,7 +116,7 @@
 		Typeahead.prototype.__init = function() {
 			this.__initConfig();
 
-			this.suggestionBox = $('<div class="typeahead-suggestion-box" jstl-ignore><div class="typeahead-suggestion-inner-box" jstl-include="'+ this.data.template+'"></div></div>');
+			this.suggestionBox = $('<div class="typeahead-suggestion-box" jstl-ignore><div class="typeahead-suggestion-inner-box" jstl-include="' + this.data.template + '"></div></div>');
 			this.suggestionBox.appendTo("body");
 			this.element.on("keyup keypress change focus click", Typeahead.prototype.inputHandle.bind(this));
 		};
@@ -142,41 +143,50 @@
 		Typeahead.prototype.__handleSpecialKeys = function(aEvent) {
 			if (aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ESC)
 				this.__cancelSelection(aEvent);
-			else if (aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ENTER && this.suggestionBox.is(".active")) {
-				this.__confirmSelection(aEvent);
-				if (this.data.mode == Typeahead.CONSTANTS.MODES.selection)
+			else if (aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ENTER) {
+				if (this.suggestionBox.is(".active") && typeof this.currentSelection !== "undefined") {
+					this.__confirmSelection(aEvent);
+					if (this.data.mode == Typeahead.CONSTANTS.MODES.selection)
+						this.__fireSelectEvent();
+				} else if (this.suggestionBox.is(".active") && typeof this.currentSelection === "undefined") {
+					if (this.data.mode == Typeahead.CONSTANTS.MODES.selection)
+						this.__cancelSelection(aEvent);
+					else{
+						this.__hideSuggestionBox();
+						this.__fireSelectEvent();						
+					}
+				}
+				else 
 					this.__fireSelectEvent();
-			} else if (aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ENTER && !this.suggestionBox.is(".active")) {
-				this.__fireSelectEvent();
 			} else if (aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ARROW_UP || aEvent.keyCode == Typeahead.CONSTANTS.KEYCODES.KEY_ARROW_DOWN)
 				this.__selectionByKey(aEvent);
 
 			aEvent.preventDefault();
 			aEvent.stopPropagation();
 		};
-		
+
 		Typeahead.prototype.__fireSelectEvent = function() {
-			if(typeof this.selectEventTimeoutId !== "undefined")
+			if (typeof this.selectEventTimeoutId !== "undefined")
 				clearTimeout(this.selectEventTimeoutId);
-			
+
 			this.selectEventTimeoutId = setTimeout((function(aData, aTypeahead) {
 				this.selectEventTimeoutId = undefined;
-				this.trigger(Typeahead.CONSTANTS.EVENTS.select, [ aData, aTypeahead ]);				
+				this.trigger(Typeahead.CONSTANTS.EVENTS.select, [ aData, aTypeahead ]);
 			}).bind(this.element, this.getSelectedData(), this), 300);
 		};
 
 		Typeahead.prototype.__doInput = function(aEvent) {
 			let value = (this.element.val() || "");
-			if(value.trim().length == 0){
+			if (value.trim().length == 0) {
 				this.setSelectedData();
 				this.__hideSuggestionBox();
 				this.__fireSelectEvent();
 				return;
 			}
-			
+
 			if (this.data.mode == Typeahead.CONSTANTS.MODES.suggestion)
 				this.setSelectedData(value);
-			
+
 			if (value.length >= this.data.inputSize)
 				this.timeoutId = setTimeout(Typeahead.prototype.__callInputAction.bind(this, value.trim()), this.data.inputInterval);
 			else
@@ -208,7 +218,7 @@
 		Typeahead.prototype.__cancelSelection = function(aEvent) {
 			this.__hideSuggestionBox();
 			if (typeof this.selected !== "undefined")
-				this.__doSelected(this.selected);			
+				this.__doSelected(this.selected);
 		};
 
 		Typeahead.prototype.__confirmSelection = function(aEvent) {
