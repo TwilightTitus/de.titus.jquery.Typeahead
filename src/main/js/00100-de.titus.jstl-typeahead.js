@@ -178,8 +178,6 @@
 			let value = (this.element.val() || "");
 			if (value.trim().length == 0) {
 				this.setSelectedData();
-				this.__hideSuggestionBox();
-				this.__fireSelectEvent();
 				return;
 			}
 
@@ -291,7 +289,7 @@
 			aEvent.stopPropagation();
 			let id = $(aEvent.currentTarget).attr("typeahead-selection-id");
 			if (typeof id !== "undefined")
-				this.__doSelected(this.suggestionData.map[id]);
+				this.__doSelected(this.suggestionData.map[id]);	
 		};
 
 		Typeahead.prototype.__doSelected = function(aItem) {
@@ -304,6 +302,7 @@
 					this.data.selectionAction(this.selected.data);
 			}
 			this.__hideSuggestionBox();
+			this.__fireSelectEvent();
 		}
 
 		Typeahead.prototype.__showSuggestionBox = function() {
@@ -317,7 +316,6 @@
 
 			this.suggestionBoxCloseListener = (function(aEvent) {
 				this.__doSelected(this.selected);
-				this.__hideSuggestionBox();
 			}).bind(this);
 
 			$(document).on("click", this.suggestionBoxCloseListener);
