@@ -1,3 +1,15 @@
+/*
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2015 Frank Schüler
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 "use strict";
 (function($, ExpressionResolver) {
 	de.titus.core.Namespace.create("de.titus.jquery.Typeahead", function() {
@@ -49,7 +61,7 @@
 
 		};
 		Typeahead.CONSTANTS = {
-		    Version : "{version}",
+		    Version : "2.0.0",
 		    KEYCODES : {
 		        KEY_ARROW_UP : 40,
 		        KEY_ARROW_DOWN : 38,
@@ -178,6 +190,8 @@
 			let value = (this.element.val() || "");
 			if (value.trim().length == 0) {
 				this.setSelectedData();
+				this.__hideSuggestionBox();
+				this.__fireSelectEvent();
 				return;
 			}
 
@@ -289,7 +303,7 @@
 			aEvent.stopPropagation();
 			let id = $(aEvent.currentTarget).attr("typeahead-selection-id");
 			if (typeof id !== "undefined")
-				this.__doSelected(this.suggestionData.map[id]);	
+				this.__doSelected(this.suggestionData.map[id]);
 		};
 
 		Typeahead.prototype.__doSelected = function(aItem) {
@@ -302,7 +316,6 @@
 					this.data.selectionAction(this.selected.data);
 			}
 			this.__hideSuggestionBox();
-			this.__fireSelectEvent();
 		}
 
 		Typeahead.prototype.__showSuggestionBox = function() {
@@ -316,6 +329,7 @@
 
 			this.suggestionBoxCloseListener = (function(aEvent) {
 				this.__doSelected(this.selected);
+				this.__hideSuggestionBox();
 			}).bind(this);
 
 			$(document).on("click", this.suggestionBoxCloseListener);
