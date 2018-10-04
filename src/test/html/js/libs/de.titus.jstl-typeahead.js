@@ -61,7 +61,7 @@
 
 		};
 		Typeahead.CONSTANTS = {
-		    Version : "2.0.1",
+		    Version : "2.0.2",
 		    KEYCODES : {
 		        KEY_ARROW_UP : 40,
 		        KEY_ARROW_DOWN : 38,
@@ -190,16 +190,16 @@
 			let value = (this.element.val() || "");
 			if (value.trim().length == 0) {
 				this.setSelectedData();
-				return;
+				this.__fireSelectEvent();
+			} else {
+				if (this.data.mode == Typeahead.CONSTANTS.MODES.suggestion)
+					this.setSelectedData(value);
+
+				if (value.length >= this.data.inputSize)
+					this.timeoutId = setTimeout(Typeahead.prototype.__callInputAction.bind(this, value.trim()), this.data.inputInterval);
+				else
+					this.__hideSuggestionBox();
 			}
-
-			if (this.data.mode == Typeahead.CONSTANTS.MODES.suggestion)
-				this.setSelectedData(value);
-
-			if (value.length >= this.data.inputSize)
-				this.timeoutId = setTimeout(Typeahead.prototype.__callInputAction.bind(this, value.trim()), this.data.inputInterval);
-			else
-				this.__hideSuggestionBox();
 		};
 
 		Typeahead.prototype.__selectionByKey = function(aEvent) {
@@ -301,7 +301,7 @@
 			aEvent.stopPropagation();
 			let id = $(aEvent.currentTarget).attr("typeahead-selection-id");
 			if (typeof id !== "undefined")
-				this.__doSelected(this.suggestionData.map[id]);	
+				this.__doSelected(this.suggestionData.map[id]);
 		};
 
 		Typeahead.prototype.__doSelected = function(aItem) {
@@ -314,7 +314,6 @@
 					this.data.selectionAction(this.selected.data);
 			}
 			this.__hideSuggestionBox();
-			this.__fireSelectEvent();
 		}
 
 		Typeahead.prototype.__showSuggestionBox = function() {
